@@ -11,10 +11,13 @@ search-object.py classifies Video files (e.g. mp4) by using pre-configured https
 
 ## Background
 
-I have got a Reo-Link RLC-422 IP camera with a simple motion detection feature, which I would like to improve with AI object detection features to improve alerting and avoid false positiv alarms. So I bought a Jetson Nano and first tried to process the realtime- H.264 stream of the camera. Doing so I ran into some problems with  CPU utilization and H.264 codec synchronization. So I decided to stop this the path of realtime processing of AI based motion detection very early.
-So I tried a new approach to install a FTP Server on Jetson Nano and let REO-Link IP camera store files at the mounted network path from Jetson Nano to run a batch-process on this stored files, to detect objects. 
+I have got a Reo-Link RLC-422 IP camera with a simple (poor) motion detection feature, which I would like to improve with AI object detection features to improve alerting and avoid false positiv alarms. 
 
-This batch processing hast got a small delay of a few minutes, which is fine for me.
+So I bought a Jetson Nano and at  first I tried to process the realtime- H.264 stream of the camera. Doing so, I ran into some problems with CPU utilization and H.264 codec synchronization. So I decided to stop this path of AI realtime processing of motion detection very early.
+
+So I tried a new approach, to install a FTP Server on Jetson Nano and let REO-Link IP camera store files at the mounted network path from Jetson Nano, to run a batch-process on this stored files, to detect objects. 
+
+The process is very easy and stable and improved the useless alarming feature of my IP camera. The process has got a small delay of a few minutes, but is really ok for my prpose.
 
 ## Setup
 
