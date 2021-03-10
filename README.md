@@ -7,17 +7,17 @@ Here you find some small software projects for my Jetson Nano.
 
 ## Introduction
 
-search-object.py classifies Video files (e.g. mp4) by using pre-configured https://github.com/dusty-nv/jetson-inference docker image to find objects via pre-trained object detection model SSD-Mobilenet-v2.
+search-object.py classifies Video files (e.g. mp4) by using pre-configured jetson docker image (https://github.com/dusty-nv/jetson-inference) to find objects via pre-trained object detection model SSD-Mobilenet-v2.
 
 ## Background
 
-I have got a Reo-Link RLC-422 IP camera with a simple (poor) motion detection feature, which I would like to improve with AI object detection features to improve alerting and avoid false positiv alarms. 
+I have got a Reo-Link RLC-422 IP camera with a simple (poor) motion detection feature, which I'd like to improve with AI object detection feature. This should improve camera motion alerting and avoid false positiv alarms. 
 
-So I bought a Jetson Nano and at  first I tried to process the realtime- H.264 stream of the camera. Doing so, I ran into some problems with CPU utilization and H.264 codec synchronization. So I decided to stop this path of AI realtime processing of motion detection very early.
+First I tried to process the H.264 stream of the IP camera with Jetson Nano in realtime. Doing so, I ran into some problems with CPU utilization. So I decided to stop this development-path of AI based realtime motion detection very early.
 
-So I tried a new approach, to install a FTP Server on Jetson Nano and let REO-Link IP camera store files at the mounted network path from Jetson Nano, to run a batch-process on this stored files, to detect objects. 
+So I tried a new batch-approach and installed a FTP Server on Jetson Nano and let REO-Link IP camera store files at the mounted network path from Jetson Nano.
 
-The process is very easy and stable and improved the useless alarming feature of my IP camera. The process has got a small delay of a few minutes, but is really ok for my prpose.
+Processing files in batched is very easy, stable and improved the useless alarming feature of my IP camera. The script has got a small delay of a few minutes, but this is really ok for my prpose.
 
 ## Setup
 
@@ -26,17 +26,17 @@ For using my script you need this:
 1. Jetson Nano
 2. Running https://github.com/dusty-nv/jetson-inference docker image
 3. Installed FTP server on Jetson Nano
-4. Any IP based camera which allows to store files videos on Jetson installed FTP
+4. Any IP based camera which allows to store video-files on Jetson installed FTP
 
 ## How to run
 
-1. Edit the variables "pathRaw" and "pathProcessed" to a accessable path from jetson-inference docker (i.g. the "data" folder is mountet to the underling host)
-2. Set up a cronjob (crontab -e) to copy uploaded video-files into the path behind variable "pathRaw"
+1. Edit the variables "pathRaw" and "pathProcessed" to an accessable path from jetson-inference docker (i.g. the "data" folder is mounted to the underling host)
+2. Set up a cronjob (crontab -e) to copy uploaded video-files to the path behind variable "pathRaw"
 
 Example : */1 * * * * find /path/to/ftp -name '*.mp4' -execdir mv {} /myscripts/rawvideo/ \;
 
 3. Move search-object.py to mounted folder from jetson-inference
 4. Start jetson-inference
-5. Inside jetson-inference docker run "python3 search-object.py"
+5. Inside jetson-inference docker run and type "python3 search-object.py"
 
 Enjoy
