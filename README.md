@@ -39,4 +39,11 @@ Example : */1 * * * * find /path/to/ftp -name '*.mp4' -execdir mv {} /myscripts/
 4. Start jetson-inference
 5. Inside jetson-inference docker run and type "python3 search-object.py"
 
+# Hints
+I figured out that sometimes jetson docker still not working anymore. (I think there could be a memory leak) Due to the fact of high effort to analyze I fixed the problem with restarting every night in system cron like this way:
+
+@reboot         root    sleep 20 && sh /*yourpath*/objDetStart.sh > /tmp/cronjob.log 2>&1
+
+Startscript "objDetStart.sh" is also now available.
+
 Enjoy
