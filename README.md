@@ -39,11 +39,16 @@ Example : */1 * * * * find /path/to/ftp -name '*.mp4' -execdir mv {} /myscripts/
 4. Start jetson-inference
 5. Inside jetson-inference docker run and type "python3 search-object.py"
 
-# Hints
-I figured out that sometimes jetson docker still not working anymore. (I think there could be a memory leak) Due to the fact of high effort to analyze I fixed the problem with restarting every night in system cron like this way:
+# Tipps & Hints
 
-@reboot         root    sleep 20 && sh /*yourpath*/objDetStart.sh > /tmp/cronjob.log 2>&1
+I figured out that sometimes jetson docker still not working anymore. (I think there is a memory leak inside some libs) Due to the fact of high effort to analyze it I fixed the problem be restarting every night using system-cron like this way:
+
+@reboot         root    sleep 20 && sh /*yourpath_to*/objDetStart.sh > /tmp/cronjob.log 2>&1
 
 Startscript "objDetStart.sh" is also now available. Please also got to jetson-inference/docker/run.sh and remove "-it" flag from "sudo docker run..." at the bottom of script, (last command) to allow docker to start during reboot automatically.
+
+You also shoud install some cleanup scripts removing old videos. Here is an example to delete nightly videos which are older than 10 days:
+
+0 0 * * * find /*yourpath_to*/my-scripts/processedvideos/ -mtime +10 -delete
 
 Enjoy
