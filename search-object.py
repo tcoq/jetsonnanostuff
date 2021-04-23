@@ -11,7 +11,7 @@ from os import listdir
 from os.path import isfile, join
 from os import remove
 
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', filename='objectDetetion.log', filemode='w', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', filename='/myscripts/objectDetetion.log', filemode='w', level=logging.INFO)
 
 logging.info("Init network and videocource-------")
 objectFound = False
@@ -96,3 +96,4 @@ while True:
     # wait 10 seconds for new files
     sleep(10)
 logging.info("Shutdown -------")
+
