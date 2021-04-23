@@ -44,6 +44,6 @@ I figured out that sometimes jetson docker still not working anymore. (I think t
 
 @reboot         root    sleep 20 && sh /*yourpath*/objDetStart.sh > /tmp/cronjob.log 2>&1
 
-Startscript "objDetStart.sh" is also now available.
+Startscript "objDetStart.sh" is also now available. Please also got to jetson-inference/docker/run.sh and remove "-it" flag from "sudo docker run..." at the bottom of script, (last command) to allow docker to start during reboot automatically.
 
 Enjoy
