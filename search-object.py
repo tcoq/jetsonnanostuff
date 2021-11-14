@@ -3,13 +3,17 @@
 
 import jetson.inference
 import jetson.utils
+import sqlite3
 import logging
 import sys
 import shutil
+import pytz
+from datetime import datetime
 from time import sleep
 from os import listdir
 from os.path import isfile, join
 from os import remove
+import traceback
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', filename='/myscripts/objectDetetion.log', filemode='w', level=logging.INFO)
 
@@ -24,9 +28,47 @@ pathRaw = "/myscripts/rawvideo/"
 pathProcessed = "/myscripts/processedvideos/"
 pathError = "/myscripts/errorvideos/"
 
+def initDetectorTable():
+    con = sqlite3.connect('/myscripts/detector_db.sqlite3')
+    cur = con.cursor()
+
+    chargelog_sql = """
+    CREATE TABLE IF NOT EXISTS detector (
+    timestamp TEXT NOT NULL,
+    classid integer NOT NULL,
+    confidence REAL NOT NULL,
+    videoPath TEXT NOT NULL)"""
+    try:
+        cur.execute(chargelog_sql)
+        con.commit()
+    except:
+        logging.error(traceback.format_exc()) 
+    cur.close()
+    con.close()
+
+
+#
+#	Delete data older 336 h / 14d
+#
+def cleanupData():
+    logging.debug("Try connecting sqllite...")
+    con = sqlite3.connect('/myscripts/detector_db.sqlite3')
+    try:
+        cur = con.cursor()
+        cur.execute("delete from detector where timestamp < datetime('now','-336 hour','localtime')")
+        con.commit()
+        cur.execute("vacuum")
+        con.commit()
+    except:
+        logging.error(traceback.format_exc()) 
+    cur.close()
+    con.close() 
+
+initDetectorTable()
+
 while True:
     dirs = listdir(pathRaw)
-
+    
     # This would print all the files and directories
     for fil in dirs:
         filename = pathRaw + fil
@@ -74,6 +116,21 @@ while True:
                                 logging.info('Detected classID: ' + str(classid) + ',confidence: ' + str(confidence) + ',coordinates: (top=' + str(topD) + ',left=' + str(leftD) + ',rigth=' + str(rightD) + ',width='  + str(widthD) + ') in imagesize (' + str(img.width) + ', ' + str(img.height) + ') file: ' + fil)
                                 processedFilename = pathProcessed + "cid_" + str(classid) + "_cf_" + str(confidence) + "_top_" + str(topD) + "_" + fil
                                 shutil.move(filename, processedFilename)
+                                
+                                con = sqlite3.connect('/myscripts/detector_db.sqlite3')
+                                cur = con.cursor()
+                                tz = pytz.timezone('Europe/Berlin')
+                                timestamp = datetime.now(tz)
+
+                                sql = "INSERT INTO 'detector' (timestamp,classid,confidence,videoPath) VALUES ('" + str(timestamp) + "'," + str(classid) + "," +str(confidence) + ",'" +str(processedFilename) +"')"
+                                try:
+                                    cur.execute(sql)
+                                    con.commit()
+                                except:
+                                    logging.error(traceback.format_exc()) 
+                                cur.close()
+                                con.close()
+                                
                                 objectFound = True
                                 break
                         else:
@@ -93,7 +150,10 @@ while True:
             logging.exception("Exception reading file: " + filename + " , unexpected error: ")
             shutil.move(filename, pathError + fil)
 
+    # only clean database if new files were generated
+    if (len(dirs) > 0):
+        # cleanup database if necessary
+        cleanupData()
     # wait 10 seconds for new files
     sleep(10)
-logging.info("Shutdown -------")
 
