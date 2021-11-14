@@ -37,7 +37,7 @@ def initDetectorTable():
     timestamp TEXT NOT NULL,
     classid integer NOT NULL,
     confidence REAL NOT NULL,
-    videoPath TEXT NOT NULL)"""
+    filename TEXT NOT NULL)"""
     try:
         cur.execute(chargelog_sql)
         con.commit()
@@ -122,7 +122,7 @@ while True:
                                 tz = pytz.timezone('Europe/Berlin')
                                 timestamp = datetime.now(tz)
 
-                                sql = "INSERT INTO 'detector' (timestamp,classid,confidence,videoPath) VALUES ('" + str(timestamp) + "'," + str(classid) + "," +str(confidence) + ",'" +str(processedFilename) +"')"
+                                sql = "INSERT INTO 'detector' (timestamp,classid,confidence,filename) VALUES ('" + str(timestamp) + "'," + str(classid) + "," +str(confidence) + ",'" +str(processedFilename) +"')"
                                 try:
                                     cur.execute(sql)
                                     con.commit()
