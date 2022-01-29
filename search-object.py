@@ -105,6 +105,19 @@ def initDetectorTable():
     cur.close()
     con.close()
 
+#
+#   This calculation has a strong dependency on your individual home environment
+#
+def isValsePositiveZone(top,right,width):
+    # this is the position where in my camera picture often detects a person instead of a bush and a electric box
+    # right = right side of the bounding box (0 = left side of picture)
+    # top = top side of the bounding box (o = top side of the picture)
+    # width = width of the bonding box
+    if (right > 835 and right < 895):
+        if (top > 100 and top < 175): 
+            if (width < 270): 
+                return True
+    return False
 
 #
 #	Delete data older 336 h / 14d
@@ -203,7 +216,6 @@ while True:
 
             frameNumber = 0        
             nightMode = False
-            detectionsDict = {}
             confidenceDict = defaultdict(list)
             consecutiveFrameDict = {}
 
@@ -213,6 +225,7 @@ while True:
             freqentClass = -1
 
             while True:
+                detectionsDict = {}
                 img = input.Capture()
                 frameNumber += 1
 
@@ -240,9 +253,9 @@ while True:
                         rightD = int(detection.Right) # y coordinate
                         widthD = int(detection.Width) # width of box
 
-                        # specify areas in video-image to avoid detection (y axis pixel)
-                        topNoDetectionZone = 200
-                        if (rightD < topNoDetectionZone):
+                        # we do not want to detect anyting which is located at the top - n pixel of the picture (this is a individual setting of your own picture)
+                        topNoDetectionZone = 135
+                        if (topD < topNoDetectionZone):
                             continue
                         # classids belong to model ssd-mobilenet-v2
                         # 1 person
@@ -275,10 +288,14 @@ while True:
                         if (classid == 1 ):
                             confidenceThreshold = 0.65
                         else:
-                            confidenceThreshold = 0.72
+                            confidenceThreshold = 0.71
 
                         if (nightMode):
                             confidenceThreshold = confidenceThreshold - 0.09
+
+                        # in the valse positive zone we need to be harder with confidence to avoid false positives
+                        if (isValsePositiveZone(topD,leftD,widthD)):
+                            confidenceThreshold = confidenceThreshold + 0.15
 
                         if (confidence >= confidenceThreshold): 
                             # now we found something with n% propability
@@ -325,6 +342,12 @@ while True:
                         logging.info('Detected classID: ' + str(freqentClass) + ' avgConfidence: ' + str(avgConfidence) +' # of consecutive detections: ' + str(countOfDetections)  + ' # of frames: ' + str(frameNumber) + ', isNight= ' + str(nightMode) + ' file: ' + fil)
                         logObjectFoundToDBAndMoveFile(fil,freqentClass,avgConfidence)
                         objectFound = True
+
+                        debug = True
+                        if (debug):
+                            name = fil.replace('.mp4', '')
+                            output = jetson.utils.videoOutput("/myscripts/processedvideos/" + name + "_widthd_" + str(widthD) + "_rightd_" + str(rightD) + "_leftd_" + str(leftD) + "_topd_" + str(topD) + "_conf_" + str(confidence) + ".jpg")
+                            output.Render(img)
             
                 if (noDetectionInFrame):
                     # found frame with no detections, consecutiveFrameDict
